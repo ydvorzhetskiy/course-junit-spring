@@ -2,10 +2,10 @@ package edu.spring.service;
 
 import edu.spring.domain.Person;
 import edu.spring.repostory.PersonRepository;
+import edu.spring.rest.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PersonServiceImpl implements PersonService {
@@ -22,8 +22,9 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Optional<Person> findById(int id) {
-        return repository.findById(id);
+    public Person getOneById(int id) {
+        return repository.findById(id)
+                .orElseThrow(NotFoundException::new);
     }
 
     @Override

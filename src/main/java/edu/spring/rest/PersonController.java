@@ -3,6 +3,7 @@ package edu.spring.rest;
 import edu.spring.domain.Person;
 import edu.spring.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,25 +30,15 @@ public class PersonController {
                 .collect(Collectors.toList());
     }
 
-    @RequestMapping(
-            value = "/person/{id}",
-            method = RequestMethod.GET
-    )
-    public PersonDto get(
-            @PathVariable("id") int id
-    ) {
-        Person person = service.findById(id).orElseThrow(NotFoundException::new);
+    @GetMapping("/person/{id}")
+    public PersonDto get(@PathVariable("id") int id) {
+        Person person = service.getOneById(id);
         return PersonDto.toDto(person);
     }
 
-    @RequestMapping(
-            value = "/person/",
-            method = RequestMethod.POST
-    )
-    public @ResponseBody
-    PersonDto create(
-            @RequestBody PersonDto dto
-    ) {
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/person/")
+    public PersonDto create(@RequestBody PersonDto dto) {
         Person account = PersonDto.toDomainObject(dto);
         Person accountWithId = service.save(account);
         return PersonDto.toDto(accountWithId);
@@ -63,7 +54,7 @@ public class PersonController {
             @PathVariable("id") int id,
             @RequestParam("name") String name
     ) {
-        Person person = service.findById(id).orElseThrow(NotFoundException::new);
+        Person person = service.getOneById(id);
         person.setName(name);
         service.save(person);
     }
