@@ -1,7 +1,7 @@
 package edu.spring.rest;
 
 import edu.spring.domain.Person;
-import edu.spring.repostory.PersonRepository;
+import edu.spring.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 @RestController
 public class PersonController {
 
-    private final PersonRepository repository;
+    private final PersonService service;
 
     @Autowired
-    public PersonController(PersonRepository repository) {
-        this.repository = repository;
+    public PersonController(PersonService service) {
+        this.service = service;
     }
 
     @RequestMapping(
@@ -24,7 +24,7 @@ public class PersonController {
             method = RequestMethod.GET
     )
     public List<PersonDto> get() {
-        return repository.findAll().stream()
+        return service.findAll().stream()
                 .map(PersonDto::toDto)
                 .collect(Collectors.toList());
     }
@@ -36,7 +36,7 @@ public class PersonController {
     public PersonDto get(
             @PathVariable("id") int id
     ) {
-        Person person = repository.findById(id).orElseThrow(NotFoundException::new);
+        Person person = service.findById(id).orElseThrow(NotFoundException::new);
         return PersonDto.toDto(person);
     }
 
@@ -44,17 +44,18 @@ public class PersonController {
             value = "/person/",
             method = RequestMethod.POST
     )
-    public @ResponseBody PersonDto create(
+    public @ResponseBody
+    PersonDto create(
             @RequestBody PersonDto dto
     ) {
         Person account = PersonDto.toDomainObject(dto);
-        Person accountWithId = repository.save(account);
+        Person accountWithId = service.save(account);
         return PersonDto.toDto(accountWithId);
     }
 
     @DeleteMapping("/person/{id}")
     public void delete(@PathVariable("id") int id) {
-        repository.deleteById(id);
+        service.deleteById(id);
     }
 
     @PutMapping("/person/{id}/holder")
@@ -62,9 +63,9 @@ public class PersonController {
             @PathVariable("id") int id,
             @RequestParam("name") String name
     ) {
-        Person person = repository.findById(id).orElseThrow(NotFoundException::new);
+        Person person = service.findById(id).orElseThrow(NotFoundException::new);
         person.setName(name);
-        repository.save(person);
+        service.save(person);
     }
 
     @ExceptionHandler(NotFoundException.class)
